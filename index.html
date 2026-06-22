@@ -21,16 +21,33 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+<div class="profile-gate hidden" id="profile-gate" role="dialog" aria-modal="true" aria-labelledby="profile-gate-title">
+  <div class="profile-card">
+    <p class="profile-kicker">Local profiles</p>
+    <h1 id="profile-gate-title">Who is learning?</h1>
+    <p class="profile-help">Pick a learner so progress, drafts, scores, and exam history stay separate on this browser. Nothing is sent to the cloud.</p>
+    <div class="profile-list" id="profile-list" aria-label="Saved learner profiles"></div>
+    <form class="profile-create-form" id="profile-create-form">
+      <label for="new-profile-name">Create new profile</label>
+      <div class="profile-create-row">
+        <input id="new-profile-name" name="profileName" type="text" maxlength="40" autocomplete="off" placeholder="Student name" required>
+        <button type="submit" class="primary-btn">Create</button>
+      </div>
+    </form>
+    <button type="button" class="ghost-btn hidden" id="profile-close-btn" data-action="close-profile-chooser">Keep current profile</button>
+  </div>
+</div>
 <div class="app">
 
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="logo">cpp<span>_tutor</span>.exe</div>
-  <div class="account-switcher" aria-label="Local progress account controls">
-    <label for="account-select">Account</label>
-    <select id="account-select" class="account-select" data-action="switch-account" aria-label="Choose local progress account"></select>
-    <button class="account-btn" data-action="create-account" title="Create a new local progress account">＋</button>
-    <button class="account-btn account-btn-danger" data-action="delete-account" title="Delete the selected local progress account">−</button>
+  <div class="account-switcher" aria-label="Local learner profile controls">
+    <span class="profile-label">Profile</span>
+    <strong id="current-profile-name" class="profile-current">Choose learner</strong>
+    <button class="account-btn account-btn-wide" data-action="open-profile-chooser" title="Choose or create a local learner profile">Switch</button>
+    <button class="account-btn account-btn-danger" data-action="delete-account" title="Delete the current local learner profile">−</button>
+    <select id="account-select" class="account-select sr-only" data-action="switch-account" aria-label="Choose local learner profile"></select>
   </div>
   <div class="topbar-center">
     <div class="overall-progress">

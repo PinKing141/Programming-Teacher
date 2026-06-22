@@ -20,6 +20,7 @@
     }
 
     app.syncGlobalTimer();
+    if (app.profileChoiceNeeded) app.openProfileChooser(true);
     hljs.highlightAll();
   };
 

@@ -23,6 +23,9 @@
     'clear-editor': element => app.clearEditor(element.dataset.editorId),
     'print-page': () => window.print(),
     'create-account': () => app.createAccount(),
+    'open-profile-chooser': () => app.openProfileChooser(),
+    'close-profile-chooser': () => app.closeProfileChooser(),
+    'select-profile': element => app.switchAccount(element.dataset.profileId),
     'delete-account': () => app.deleteCurrentAccount(),
     'switch-account': element => app.switchAccount(element.value)
   };
@@ -50,6 +53,16 @@
       if (!action) return;
 
       action(trigger, event);
+    });
+
+    document.addEventListener('submit', event => {
+      const form = event.target.closest('#profile-create-form');
+      if (!form) return;
+
+      event.preventDefault();
+      const input = form.querySelector('[name="profileName"]');
+      app.createAccount(input ? input.value : '');
+      form.reset();
     });
   };
 })();

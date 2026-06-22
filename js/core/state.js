@@ -5,6 +5,7 @@
   const ACCOUNT_META_KEY = 'cpp_tutor_accounts';
   const CURRENT_ACCOUNT_KEY = 'cpp_tutor_current_account';
   const ACCOUNT_SAVE_PREFIX = 'cpp_tutor_save::';
+  const PROFILE_SAVE_PREFIX = 'cpp_tutor_profile::';
 
   function makeAccountId(name) {
     return (name || 'learner')
@@ -16,7 +17,7 @@
   }
 
   function getAccountSaveKey(accountId = app.currentAccountId) {
-    return `${ACCOUNT_SAVE_PREFIX}${accountId}`;
+    return `${PROFILE_SAVE_PREFIX}${accountId}`;
   }
 
   function getStoredAccounts() {
@@ -39,14 +40,17 @@
     if (!accounts.length) {
       accounts = [{ id: 'default', name: 'Default' }];
       const legacySave = localStorage.getItem(LEGACY_SAVE_KEY);
-      if (legacySave && !localStorage.getItem(getAccountSaveKey('default'))) {
-        localStorage.setItem(getAccountSaveKey('default'), legacySave);
+      const oldAccountSave = localStorage.getItem(`${ACCOUNT_SAVE_PREFIX}default`);
+      if ((legacySave || oldAccountSave) && !localStorage.getItem(getAccountSaveKey('default'))) {
+        localStorage.setItem(getAccountSaveKey('default'), legacySave || oldAccountSave);
       }
       storeAccounts(accounts);
     }
 
+    const hadSavedChoice = Boolean(localStorage.getItem(CURRENT_ACCOUNT_KEY));
     let currentId = localStorage.getItem(CURRENT_ACCOUNT_KEY);
     if (!accounts.some(account => account.id === currentId)) currentId = accounts[0].id;
+    app.profileChoiceNeeded = app.profileChoiceNeeded || !hadSavedChoice;
     localStorage.setItem(CURRENT_ACCOUNT_KEY, currentId);
 
     app.accounts = accounts;
@@ -79,14 +83,56 @@
     if (state.dayCheckpointTimer) clearInterval(state.dayCheckpointTimer);
   }
 
+  function getCurrentAccount() {
+    ensureAccounts();
+    return app.accounts.find(account => account.id === app.currentAccountId) || app.accounts[0];
+  }
+
   app.renderAccountPicker = function renderAccountPicker() {
     const select = document.getElementById('account-select');
-    if (!select) return;
+    const currentName = document.getElementById('current-profile-name');
+    ensureAccounts();
+
+    if (select) {
+      select.innerHTML = app.accounts
+        .map(account => `<option value="${app.escapeHtml(account.id)}" ${account.id === app.currentAccountId ? 'selected' : ''}>${app.escapeHtml(account.name)}</option>`)
+        .join('');
+    }
+
+    if (currentName) currentName.textContent = getCurrentAccount().name;
+    app.renderProfileChooser();
+  };
+
+  app.renderProfileChooser = function renderProfileChooser() {
+    const list = document.getElementById('profile-list');
+    if (!list) return;
 
     ensureAccounts();
-    select.innerHTML = app.accounts
-      .map(account => `<option value="${app.escapeHtml(account.id)}" ${account.id === app.currentAccountId ? 'selected' : ''}>${app.escapeHtml(account.name)}</option>`)
-      .join('');
+    list.innerHTML = app.accounts.map(account => {
+      const isCurrent = account.id === app.currentAccountId;
+      return `
+        <button type="button" class="profile-choice ${isCurrent ? 'active' : ''}" data-action="select-profile" data-profile-id="${app.escapeHtml(account.id)}">
+          <span>${app.escapeHtml(account.name)}</span>
+          <small>${isCurrent ? 'Current profile' : 'Use this profile'}</small>
+        </button>`;
+    }).join('');
+  };
+
+  app.openProfileChooser = function openProfileChooser(force = false) {
+    const gate = document.getElementById('profile-gate');
+    const closeButton = document.getElementById('profile-close-btn');
+    if (!gate) return;
+
+    app.renderProfileChooser();
+    gate.classList.remove('hidden');
+    if (closeButton) closeButton.classList.toggle('hidden', force);
+    const input = document.getElementById('new-profile-name');
+    if (input) input.focus();
+  };
+
+  app.closeProfileChooser = function closeProfileChooser() {
+    const gate = document.getElementById('profile-gate');
+    if (gate) gate.classList.add('hidden');
   };
 
   app.refreshForCurrentAccount = function refreshForCurrentAccount() {
@@ -154,8 +200,8 @@
     }
   };
 
-  app.createAccount = function createAccount() {
-    const name = window.prompt('New local account name (saved only in this browser):');
+  app.createAccount = function createAccount(profileName) {
+    const name = typeof profileName === 'string' ? profileName : window.prompt('New local profile name (saved only in this browser):');
     if (!name || !name.trim()) return;
 
     const accounts = ensureAccounts();
@@ -173,11 +219,16 @@
     Object.assign(state, app.getDefaultState());
     app.saveState();
     app.refreshForCurrentAccount();
+    app.closeProfileChooser();
   };
 
   app.switchAccount = function switchAccount(accountId) {
     ensureAccounts();
-    if (!app.accounts.some(account => account.id === accountId) || accountId === app.currentAccountId) return;
+    if (!app.accounts.some(account => account.id === accountId)) return;
+    if (accountId === app.currentAccountId) {
+      app.closeProfileChooser();
+      return;
+    }
 
     app.saveState();
     app.currentAccountId = accountId;
@@ -186,16 +237,17 @@
     Object.assign(state, app.getDefaultState());
     app.loadState();
     app.refreshForCurrentAccount();
+    app.closeProfileChooser();
   };
 
   app.deleteCurrentAccount = function deleteCurrentAccount() {
     const accounts = ensureAccounts();
     const current = accounts.find(account => account.id === app.currentAccountId);
     if (accounts.length === 1) {
-      window.alert('Create another account before deleting this one.');
+      window.alert('Create another profile before deleting this one.');
       return;
     }
-    if (!window.confirm(`Delete the local account "${current.name}" and its saved progress from this browser?`)) return;
+    if (!window.confirm(`Delete the local profile "${current.name}" and its saved progress from this browser?`)) return;
 
     localStorage.removeItem(getAccountSaveKey(current.id));
     const remaining = accounts.filter(account => account.id !== current.id);
@@ -209,7 +261,7 @@
   };
 
   app.resetEverything = function resetEverything() {
-    const confirmed = window.confirm('Reset this account\'s saved progress, code drafts, scores, streaks, answered questions, and past test history? Other accounts will not be changed.');
+    const confirmed = window.confirm('Reset this profile\'s saved progress, code drafts, scores, streaks, answered questions, and past test history? Other profiles will not be changed.');
     if (!confirmed) return;
 
     ensureAccounts();
