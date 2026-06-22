@@ -165,6 +165,26 @@
         }
       },
       {
+        name: 'Compiler requests include an optional Piston auth token',
+        run() {
+          const previousToken = localStorage.getItem('cpp_tutor_piston_token');
+          localStorage.setItem('cpp_tutor_piston_token', ' test-token ');
+          const headers = app.getCompilerRequestHeaders();
+          assert(headers['Content-Type'] === 'application/json', 'Expected JSON requests.');
+          assert(headers.Authorization === 'Bearer test-token', 'Expected trimmed bearer token header.');
+          if (previousToken === null) localStorage.removeItem('cpp_tutor_piston_token');
+          else localStorage.setItem('cpp_tutor_piston_token', previousToken);
+        }
+      },
+      {
+        name: 'Compiler auth failures explain token setup',
+        run() {
+          const html = app.renderCompilerServiceError(new Error('Compiler service returned HTTP 401.'));
+          assert(html.includes('needs authorization'), 'Expected an authorization-specific heading.');
+          assert(html.includes('Piston access token'), 'Expected token setup guidance.');
+        }
+      },
+      {
         name: 'State save and load round-trip through localStorage',
         run() {
           Object.assign(state, app.getDefaultState());
