@@ -61,7 +61,7 @@
         <div class="quiz-body">
           <div class="quiz-prompt">${app.formatPrompt(question.q)}</div>
           <textarea class="code-editor" id="exam-ed-${index}" placeholder="Write your answer here..." spellcheck="false">${app.escapeHtml(app.getDraftValue(`exam-ed-${index}`))}</textarea>
-          <div class="action-row"><button class="btn btn-secondary clear-btn" data-action="clear-editor" data-editor-id="exam-ed-${index}">Clear</button></div>
+          <div class="action-row"><button class="btn btn-secondary" data-action="run-code" data-key="exam-${index}">▶ Run Code</button><button class="btn btn-secondary clear-btn" data-action="clear-editor" data-editor-id="exam-ed-${index}">Clear</button></div><div class="run-output hint" id="run-output-exam-${index}">Run output will appear here after you click Run Code.</div>
         </div>
       </div>`;
     });

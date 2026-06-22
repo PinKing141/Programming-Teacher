@@ -2,6 +2,13 @@
 
 Static exam-focused C++ revision app for local browser use. The main app entry is `index.html` and does not require a build step or local server.
 
+
+## Running C++ Code
+
+Code questions now include a **Run Code** button. The app wraps function-style answers in a small C++ test harness, sends the program to a real GCC-compatible sandbox, and prints compiler errors, runtime errors, raw output, and visible test-case results under the editor. A separate **Code Lab** tab lets learners run complete C++ programs outside the lesson flow.
+
+The runner uses the public Piston execution API from the browser, so compiling code requires an internet connection. If the sandbox is unavailable, the app keeps drafts and checker feedback available and shows a connection error in the run-output panel.
+
 ## Test Harnesses
 
 Open either harness page directly in the browser or VS Code integrated browser.
@@ -14,6 +21,7 @@ Covers:
 
 - grading normalization for equivalent correct answers
 - syntax issue detection keeping broken answers below pass threshold
+- C++ runner wrapper generation and output comparison
 - checkpoint timer auto-submit when time reaches zero
 - `localStorage` save/load round-trip for tutor state and drafts
 
