@@ -4,6 +4,7 @@
 
   const PISTON_ENDPOINT = 'https://emkc.org/api/v2/piston/execute';
   const CPP_VERSION = '10.2.0';
+  const CPP_LANGUAGE = 'cpp';
 
   runtime.runResults = runtime.runResults || {};
 
@@ -51,6 +52,65 @@
     return `${app.getCodePrelude()}\n\n${code}\n\nint main()\n{\n${body}\n${runnableTests.length ? '    return 0;\n' : ''}}`;
   };
 
+
+  app.getCompilerTargetFromEditorId = function getCompilerTargetFromEditorId(editorId) {
+    if (!editorId) return null;
+    if (editorId === 'lab-editor') return { key: 'lab', mode: 'lab' };
+    if (editorId.startsWith('exam-ed-')) return { key: `exam-${editorId.replace('exam-ed-', '')}`, mode: 'question' };
+    if (editorId.startsWith('ed-')) return { key: editorId.slice(3), mode: 'question' };
+    return { key: `editor-${editorId}`, mode: 'standalone', editorId };
+  };
+
+  app.ensureCompilerForEditor = function ensureCompilerForEditor(textarea) {
+    if (!textarea || textarea.dataset.compilerAttached === 'true') return;
+    const target = app.getCompilerTargetFromEditorId(textarea.id);
+    if (!target) return;
+
+    textarea.dataset.compilerAttached = 'true';
+    if (target.mode !== 'standalone') return;
+
+    const actions = document.createElement('div');
+    actions.className = 'action-row compiler-action-row';
+    actions.innerHTML = `<button class="btn btn-primary" data-action="run-editor-code" data-editor-id="${app.escapeHtml(textarea.id)}">▶ Run Code</button>`;
+
+    const output = document.createElement('div');
+    output.className = 'run-output hint';
+    output.id = 'run-output-' + target.key;
+    output.textContent = 'Run output will appear here after you click Run Code.';
+
+    textarea.insertAdjacentElement('afterend', output);
+    textarea.insertAdjacentElement('afterend', actions);
+  };
+
+  app.runEditorCode = async function runEditorCode(editorId) {
+    const target = app.getCompilerTargetFromEditorId(editorId);
+    if (!target) return;
+    if (target.mode === 'lab') {
+      await app.runLabCode();
+      return;
+    }
+    if (target.mode === 'question') {
+      await app.runCode(target.key);
+      return;
+    }
+
+    const value = app.getEditorValue(editorId).trim();
+    if (!value) {
+      app.setRunOutput(target.key, 'hint', 'Write a complete C++ program, then click Run Code.');
+      return;
+    }
+
+    app.setRunOutput(target.key, 'running', `<strong>Running real C++...</strong><p>${app.getCompilerProviderLabel()}</p>`);
+    try {
+      const result = await app.executeCppProgram(value, '');
+      const rendered = app.renderRunResult(result, []);
+      runtime.runResults[target.key] = { result, tests: [], rendered, timestamp: new Date().toISOString() };
+      app.setRunOutput(target.key, rendered.tone, rendered.html);
+    } catch (error) {
+      app.setRunOutput(target.key, 'fail', `<strong>Could not reach the compiler sandbox.</strong><p>${app.escapeHtml(error.message)}</p>`);
+    }
+  };
+
   app.getRunOutputElement = function getRunOutputElement(key) {
     return document.getElementById('run-output-' + key);
   };
@@ -67,7 +127,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        language: 'c++',
+        language: CPP_LANGUAGE,
         version: CPP_VERSION,
         files: [{ name: 'main.cpp', content: program }],
         stdin: stdin || '',

@@ -105,6 +105,32 @@
         }
       },
       {
+        name: 'Shows compiler controls beside every rendered IDE',
+        async run() {
+          app = await bootCleanApp();
+          const learnEditors = [...frame.contentDocument.querySelectorAll('#panel-learn .code-editor')];
+          assert(learnEditors.length > 0, 'Expected lesson IDEs to be rendered.');
+          learnEditors.forEach(editor => {
+            const key = editor.id.replace(/^ed-/, '');
+            assert(frame.contentDocument.getElementById(`run-output-${key}`), `Expected compiler output for ${editor.id}.`);
+          });
+
+          dispatchAppClick('.mode-btn[data-panel="lab"]');
+          await wait(80);
+          assert(frame.contentDocument.getElementById('run-output-lab'), 'Expected the Code Lab IDE to include compiler output.');
+
+          dispatchAppClick('.mode-btn[data-panel="exam"]');
+          dispatchAppClick('#start-exam-btn');
+          await wait(80);
+          const examEditors = [...frame.contentDocument.querySelectorAll('#panel-exam .code-editor')];
+          assert(examEditors.length > 0, 'Expected exam IDEs to be rendered after starting the exam.');
+          examEditors.forEach(editor => {
+            const key = `exam-${editor.id.replace('exam-ed-', '')}`;
+            assert(frame.contentDocument.getElementById(`run-output-${key}`), `Expected compiler output for ${editor.id}.`);
+          });
+        }
+      },
+      {
         name: 'Restores a saved code draft after a reload',
         async run() {
           app = await bootCleanApp();

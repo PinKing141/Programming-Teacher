@@ -109,6 +109,9 @@
 
   app.attachEditorListeners = function attachEditorListeners() {
     app.teardownEditorInstances();
-    document.querySelectorAll('.code-editor').forEach(app.createCodeEditor);
+    document.querySelectorAll('.code-editor').forEach(textarea => {
+      app.createCodeEditor(textarea);
+      if (typeof app.ensureCompilerForEditor === 'function') app.ensureCompilerForEditor(textarea);
+    });
   };
 })();
