@@ -9,6 +9,9 @@
     document.querySelectorAll('.mode-btn').forEach(button => {
       button.classList.toggle('active', button.dataset.panel === panel);
     });
+    document.querySelectorAll('.mbn-item').forEach(button => {
+      button.classList.toggle('active', button.dataset.panel === panel);
+    });
 
     if (panel === 'pass') app.renderPassMode();
     if (panel === 'checkpoint') app.renderDayCheckpointPanel();

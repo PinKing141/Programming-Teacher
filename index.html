@@ -39,8 +39,18 @@
 </div>
 <div class="app">
 
+<!-- MOBILE NAV OVERLAY -->
+<div class="mobile-nav-overlay" id="mobile-nav-overlay" aria-hidden="true" data-action="close-mobile-menu"></div>
+
 <!-- TOP BAR -->
 <div class="topbar">
+  <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" aria-label="Collapse sidebar" title="Toggle sidebar" data-action="toggle-sidebar">
+    <svg width="18" height="16" viewBox="0 0 18 16" fill="currentColor" aria-hidden="true">
+      <rect y="0" width="18" height="2" rx="1"/>
+      <rect y="7" width="18" height="2" rx="1"/>
+      <rect y="14" width="18" height="2" rx="1"/>
+    </svg>
+  </button>
   <div class="logo">cpp<span>_tutor</span>.exe</div>
   <div class="account-switcher" aria-label="Local learner profile controls">
     <span class="profile-label">Profile</span>
@@ -70,6 +80,11 @@
       <div class="topbar-timer-mode" id="global-timer-mode">Exam Simulator</div>
     </div>
   </div>
+  <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar" data-action="open-mobile-menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
   <div class="mode-btns">
     <button class="mode-btn active" data-action="show-panel" data-panel="learn">Learn</button>
     <button class="mode-btn" data-action="show-panel" data-panel="practice">Practice</button>
@@ -81,7 +96,18 @@
 </div>
 
 <!-- SIDEBAR -->
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-mobile-header">
+    <span class="sidebar-mobile-title">cpp<span>_tutor</span>.exe</span>
+    <button class="sidebar-close-btn" aria-label="Close menu" data-action="close-mobile-menu">✕</button>
+  </div>
+  <div class="sidebar-mobile-profile">
+    <div class="sidebar-mobile-profile-info">
+      <span class="sidebar-mobile-profile-label">Learner</span>
+      <strong id="sidebar-mobile-profile-name" class="sidebar-mobile-profile-name">Choose learner</strong>
+    </div>
+    <button class="account-btn account-btn-wide" data-action="open-profile-chooser" title="Switch learner">Switch</button>
+  </div>
   <div class="sidebar-section">Study Plan</div>
   <button type="button" class="nav-item active" data-action="go-day" data-day="0" id="nav-0">
     <span class="nav-icon">1️⃣</span>Functions &amp; If
@@ -131,6 +157,34 @@
   </div>
   <button class="btn btn-danger sidebar-reset-btn" data-action="reset-everything">Reset Everything</button>
 </div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Mode navigation">
+  <button class="mbn-item active" data-action="show-panel" data-panel="learn">
+    <span class="mbn-icon">📖</span>
+    <span class="mbn-label">Learn</span>
+  </button>
+  <button class="mbn-item" data-action="show-panel" data-panel="practice">
+    <span class="mbn-icon">🎲</span>
+    <span class="mbn-label">Practice</span>
+  </button>
+  <button class="mbn-item" data-action="show-panel" data-panel="pass">
+    <span class="mbn-icon">🎯</span>
+    <span class="mbn-label">Pass</span>
+  </button>
+  <button class="mbn-item" data-action="show-panel" data-panel="exam">
+    <span class="mbn-icon">⏱️</span>
+    <span class="mbn-label">Exam</span>
+  </button>
+  <button class="mbn-item" data-action="show-panel" data-panel="lab">
+    <span class="mbn-icon">▶️</span>
+    <span class="mbn-label">Lab</span>
+  </button>
+  <button class="mbn-item" data-action="show-panel" data-panel="cheat">
+    <span class="mbn-icon">📋</span>
+    <span class="mbn-label">Cheat</span>
+  </button>
+</nav>
 
 <!-- MAIN CONTENT -->
 <div class="main" id="main">

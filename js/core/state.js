@@ -100,6 +100,8 @@
     }
 
     if (currentName) currentName.textContent = getCurrentAccount().name;
+    const mobileProfileName = document.getElementById('sidebar-mobile-profile-name');
+    if (mobileProfileName) mobileProfileName.textContent = getCurrentAccount().name;
     app.renderProfileChooser();
   };
 

@@ -1,10 +1,33 @@
 (function () {
   const app = window.App;
 
+  function openMobileMenu() {
+    const appEl = document.querySelector('.app');
+    const overlay = document.getElementById('mobile-nav-overlay');
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    appEl.classList.add('nav-open');
+    if (overlay) requestAnimationFrame(() => overlay.classList.add('visible'));
+    if (menuBtn) menuBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMobileMenu() {
+    const appEl = document.querySelector('.app');
+    const overlay = document.getElementById('mobile-nav-overlay');
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    appEl.classList.remove('nav-open');
+    if (overlay) overlay.classList.remove('visible');
+    if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
   const clickActions = {
-    'show-panel': element => app.showPanel(element.dataset.panel),
-    'go-day': element => app.goDay(parseInt(element.dataset.day, 10)),
+    'show-panel': element => { app.showPanel(element.dataset.panel); closeMobileMenu(); },
+    'go-day': element => { app.goDay(parseInt(element.dataset.day, 10)); closeMobileMenu(); },
     'reset-everything': () => app.resetEverything(),
+    'toggle-sidebar': () => document.querySelector('.app').classList.toggle('sidebar-collapsed'),
+    'open-mobile-menu': () => openMobileMenu(),
+    'close-mobile-menu': () => closeMobileMenu(),
     'generate-question': () => app.generateQuestion(),
     'generate-weakness': () => app.generateWeakness(),
     'start-speed-drill': () => app.startSpeedDrill(),
