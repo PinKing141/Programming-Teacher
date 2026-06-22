@@ -136,6 +136,26 @@
         }
       },
       {
+        name: 'Compiler wrapper builds runnable test programs',
+        run() {
+          const program = app.buildCppProgram('int AddFive(int n) { return n + 5; }', [{ call: 'AddFive(3)', expected: '8' }]);
+          assert(program.includes('int main()'), 'Expected a generated main function.');
+          assert(program.includes('std::cout << (AddFive(3))'), 'Expected the test call to be printed.');
+          assert(program.includes('#include <vector>'), 'Expected standard C++ headers.');
+        }
+      },
+      {
+        name: 'Compiler output comparison marks passing and failing tests',
+        run() {
+          const comparisons = app.compareRunResults('8\n4\n', [
+            { name: 'first', call: 'AddFive(3)', expected: '8' },
+            { name: 'second', call: 'AddFive(0)', expected: '5' }
+          ]);
+          assert(comparisons[0].passed === true, 'Expected first run test to pass.');
+          assert(comparisons[1].passed === false, 'Expected second run test to fail.');
+        }
+      },
+      {
         name: 'State save and load round-trip through localStorage',
         run() {
           Object.assign(state, app.getDefaultState());

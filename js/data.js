@@ -1249,3 +1249,40 @@ const EXAM_Q = [
   DAYS[3].questions.find(q=>q.diff==='hard'),
   DAYS[4].questions.find(q=>q.diff==='hard'),
 ];
+(function addCompilerRunTests() {
+  const testsByName = {
+    AddFive: [{ name: 'AddFive(3)', call: 'AddFive(3)', expected: '8' }, { name: 'AddFive(-2)', call: 'AddFive(-2)', expected: '3' }],
+    Triple: [{ name: 'Triple(4)', call: 'Triple(4)', expected: '12' }, { name: 'Triple(-2)', call: 'Triple(-2)', expected: '-6' }],
+    IsPositive: [{ name: 'IsPositive(3)', call: 'IsPositive(3)', expected: '1' }, { name: 'IsPositive(-1)', call: 'IsPositive(-1)', expected: '0' }],
+    BiggerNumber: [{ name: 'BiggerNumber(7, 4)', call: 'BiggerNumber(7, 4)', expected: '7' }, { name: 'BiggerNumber(2, 9)', call: 'BiggerNumber(2, 9)', expected: '9' }],
+    Update_Points: [{ name: 'Update_Points(10)', call: 'Update_Points(10)', expected: '50' }, { name: 'Update_Points(-5)', call: 'Update_Points(-5)', expected: '0' }],
+    ScoreGrade: [{ name: 'ScoreGrade(75)', call: 'ScoreGrade(75)', expected: '1' }, { name: 'ScoreGrade(55)', call: 'ScoreGrade(55)', expected: '2' }, { name: 'ScoreGrade(20)', call: 'ScoreGrade(20)', expected: '3' }],
+    SumAll: [{ name: 'SumAll({1,2,3})', call: 'SumAll(vector<int>{1,2,3})', expected: '6' }],
+    FindLargest: [{ name: 'FindLargest({4,9,2})', call: 'FindLargest(vector<int>{4,9,2})', expected: '9' }],
+    Total_Sand_Diff: [{ name: 'Total_Sand_Diff({10,25,5,10})', call: 'Total_Sand_Diff(vector<int>{10,25,5,10})', expected: '-20' }],
+    ReverseWord: [{ name: 'ReverseWord("cat")', call: 'ReverseWord(string("cat"))', expected: 'tac' }],
+    FindBiggest: [{ name: 'FindBiggest', call: 'FindBiggest(vector<string>{"red","green","blue"})', expected: 'green' }],
+    Password_maker: [{ name: 'Password_maker', call: 'Password_maker(vector<string>{"cat","zebra","to"})', expected: 'zebraot1' }],
+    Convert: [{ name: 'Convert(15.0f)', call: 'Convert(15.0f)', expected: '52' }],
+    SafeToFly: [{ name: 'SafeToFly unsafe index 0', call: '([](){ int a[3] = {9,1,40}; return SafeToFly(a); })()', expected: '0' }, { name: 'SafeToFly safe', call: '([](){ int a[3] = {10,1,60}; return SafeToFly(a); })()', expected: '1' }],
+    SubtractTwo: [{ name: 'SubtractTwo(9)', call: 'SubtractTwo(9)', expected: '7' }],
+    IsAdult: [{ name: 'IsAdult(18)', call: 'IsAdult(18)', expected: '1' }, { name: 'IsAdult(12)', call: 'IsAdult(12)', expected: '0' }],
+    BonusScore: [{ name: 'BonusScore(5)', call: 'BonusScore(5)', expected: '13' }, { name: 'BonusScore(0)', call: 'BonusScore(0)', expected: '1' }],
+    CountItems: [{ name: 'CountItems({1,2,3})', call: 'CountItems(vector<int>{1,2,3})', expected: '3' }],
+    SumOddIndexes: [{ name: 'SumOddIndexes({10,2,10,3})', call: 'SumOddIndexes(vector<int>{10,2,10,3})', expected: '5' }],
+    BiggerTotal: [{ name: 'BiggerTotal({9,11,20})', call: 'BiggerTotal(vector<int>{9,11,20})', expected: '31' }],
+    FirstLetter: [{ name: 'FirstLetter("Sam")', call: 'FirstLetter(string("Sam"))', expected: 'S' }],
+    ReverseName: [{ name: 'ReverseName("Alex")', call: 'ReverseName(string("Alex"))', expected: 'xelA' }],
+    ShortestWord: [{ name: 'ShortestWord', call: 'ShortestWord(vector<string>{"red","to","go"})', expected: 'go' }]
+  };
+
+  const allQuestionSets = [DAYS, DAY_CHECKPOINTS].flatMap(group => group.map(item => item.questions));
+  allQuestionSets.forEach(questions => {
+    questions.forEach(question => {
+      if (question.type !== 'code' || question.runTests) return;
+      const text = [question.q, question.ans, ...(question.checks || [])].join(' ');
+      const name = Object.keys(testsByName).find(candidate => text.includes(candidate));
+      if (name) question.runTests = testsByName[name];
+    });
+  });
+})();

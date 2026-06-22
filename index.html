@@ -75,6 +75,7 @@
     <button class="mode-btn" data-action="show-panel" data-panel="practice">Practice</button>
     <button class="mode-btn" data-action="show-panel" data-panel="pass">Pass Mode</button>
     <button class="mode-btn" data-action="show-panel" data-panel="exam">Exam Sim</button>
+    <button class="mode-btn" data-action="show-panel" data-panel="lab">Code Lab</button>
     <button class="mode-btn" data-action="show-panel" data-panel="cheat">Cheat Sheet</button>
   </div>
 </div>
@@ -113,6 +114,9 @@
   </button>
   <button type="button" class="nav-item" data-action="show-panel" data-panel="exam">
     <span class="nav-icon">⏱️</span>Exam Simulator
+  </button>
+  <button type="button" class="nav-item" data-action="show-panel" data-panel="lab">
+    <span class="nav-icon">▶️</span>Code Lab
   </button>
   <button type="button" class="nav-item" data-action="show-panel" data-panel="pass">
     <span class="nav-icon">🎯</span>40% Pass Mode
@@ -233,6 +237,27 @@
     <div id="exam-history"></div>
   </div>
 
+  <!-- ══════════ CODE LAB PANEL ══════════ -->
+  <div class="panel" id="panel-lab">
+    <div class="page-title">Code Lab</div>
+    <div class="page-sub">Write a complete C++ program and run it with the real GCC sandbox. Use this space to experiment outside the lesson questions.</div>
+    <div class="lab-card">
+      <textarea class="code-editor" id="lab-editor" spellcheck="false">#include &lt;iostream&gt;
+using namespace std;
+
+int main()
+{
+    cout &lt;&lt; "Hello, C++!" &lt;&lt; endl;
+    return 0;
+}</textarea>
+      <div class="action-row">
+        <button class="btn btn-primary" data-action="run-lab-code">▶ Run Code</button>
+        <button class="btn btn-secondary clear-btn" data-action="clear-editor" data-editor-id="lab-editor">Clear</button>
+      </div>
+      <div class="run-output hint" id="run-output-lab">Run output will appear here.</div>
+    </div>
+  </div>
+
   <!-- ══════════ CHEAT SHEET PANEL ══════════ -->
   <div class="panel" id="panel-cheat">
     <button class="btn btn-primary print-btn" data-action="print-page">🖨️ Print to A4</button>
@@ -249,6 +274,7 @@
   <script src="js/data.js"></script>
   <script src="js/core/runtime.js"></script>
   <script src="js/core/helpers.js"></script>
+  <script src="js/core/compiler.js"></script>
   <script src="js/core/editors.js"></script>
   <script src="js/core/state.js"></script>
   <script src="js/features/checkpoints.js"></script>

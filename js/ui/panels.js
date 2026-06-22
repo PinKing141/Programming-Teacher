@@ -15,6 +15,7 @@
     if (panel === 'cheat') app.renderCheatSheet();
     if (panel === 'learn') app.renderLearnPanel();
     if (panel === 'exam') app.renderExamHistory();
+    if (panel === 'lab') app.attachEditorListeners();
     if (panel !== 'practice') app.stopDrillTimer();
 
     app.syncGlobalTimer();
@@ -65,6 +66,13 @@
     app.attachEditorListeners();
   };
 
+
+  app.buildRunTestsPreview = function buildRunTestsPreview(question) {
+    const tests = app.getQuestionRunTests(question).filter(test => test && test.call && !test.hidden);
+    if (!tests.length) return '';
+    return `<details class="run-tests-preview"><summary>Visible run tests</summary><ul>${tests.map(test => `<li><span class="inline-code">${app.escapeHtml(test.call)}</span> → <span class="inline-code">${app.escapeHtml(test.expected)}</span></li>`).join('')}</ul></details>`;
+  };
+
   app.buildQuizCard = function buildQuizCard(question, key, number) {
     const diffClass = { easy: 'badge-easy', medium: 'badge-med', hard: 'badge-hard' }[question.diff];
     const typeLabel = question.type === 'mcq' ? 'mcq' : 'code';
@@ -85,13 +93,16 @@
       body = `<div class="editor-wrap">
         <textarea class="code-editor" id="${editorId}" placeholder="Write your C++ answer here...&#10;&#10;Tip: use Tab to indent" spellcheck="false">${app.escapeHtml(app.getDraftValue(editorId))}</textarea>
         <div class="editor-hint"><span>Use Tab for indentation</span><span>4 spaces = 1 tab</span></div>
+        ${app.buildRunTestsPreview(question)}
       </div>
       <div class="action-row">
         <button class="btn btn-primary" data-action="check-code" data-key="${key}">Check Answer</button>
+        <button class="btn btn-secondary" data-action="run-code" data-key="${key}">▶ Run Code</button>
         <button class="btn btn-secondary" data-action="show-hint" data-key="${key}">Hint</button>
         <button class="btn btn-secondary clear-btn" data-action="clear-editor" data-editor-id="${editorId}">Clear</button>
         <button class="btn btn-danger" data-action="reveal-answer" data-key="${key}">Show Answer</button>
-      </div>`;
+      </div>
+      <div class="run-output hint" id="run-output-${key}">Run output will appear here after you click Run Code.</div>`;
     }
 
     const feedbackHtml = done !== undefined && question.type === 'mcq'
