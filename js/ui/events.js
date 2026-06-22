@@ -18,6 +18,7 @@
     'answer-mcq': element => app.answerMcq(element.dataset.key, parseInt(element.dataset.picked, 10), parseInt(element.dataset.correct, 10)),
     'check-code': element => app.checkCode(element.dataset.key),
     'show-hint': element => app.showHint(element.dataset.key),
+    'close-feedback': element => app.closeFeedback(element.dataset.key),
     'reveal-answer': element => app.revealAnswer(element.dataset.key),
     'clear-editor': element => app.clearEditor(element.dataset.editorId),
     'print-page': () => window.print()
