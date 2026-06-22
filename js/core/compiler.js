@@ -5,11 +5,38 @@
   const PISTON_ENDPOINT = 'https://emkc.org/api/v2/piston/execute';
   const CPP_VERSION = '10.2.0';
   const CPP_LANGUAGE = 'cpp';
+  const PISTON_AUTH_STORAGE_KEY = 'cpp_tutor_piston_token';
 
   runtime.runResults = runtime.runResults || {};
 
   app.getCompilerProviderLabel = function getCompilerProviderLabel() {
     return 'Real C++ compile/run via the Piston GCC sandbox';
+  };
+
+  app.getCompilerAuthToken = function getCompilerAuthToken() {
+    const configuredToken = window.CPP_TUTOR_PISTON_TOKEN || '';
+    if (configuredToken.trim()) return configuredToken.trim();
+
+    try {
+      return (localStorage.getItem(PISTON_AUTH_STORAGE_KEY) || '').trim();
+    } catch (error) {
+      return '';
+    }
+  };
+
+  app.getCompilerRequestHeaders = function getCompilerRequestHeaders() {
+    const headers = { 'Content-Type': 'application/json' };
+    const token = app.getCompilerAuthToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+    return headers;
+  };
+
+  app.renderCompilerServiceError = function renderCompilerServiceError(error) {
+    const message = error?.message || 'Compiler service is unavailable.';
+    if (/HTTP\s+(401|403)\b/.test(message)) {
+      return '<strong>Compiler sandbox needs authorization.</strong><p>The public Piston compiler service rejected this request. Add a Piston access token, then try Run Code again.</p>';
+    }
+    return `<strong>Could not reach the compiler sandbox.</strong><p>${app.escapeHtml(message)}</p>`;
   };
 
   app.hasMainFunction = function hasMainFunction(code) {
@@ -107,7 +134,7 @@
       runtime.runResults[target.key] = { result, tests: [], rendered, timestamp: new Date().toISOString() };
       app.setRunOutput(target.key, rendered.tone, rendered.html);
     } catch (error) {
-      app.setRunOutput(target.key, 'fail', `<strong>Could not reach the compiler sandbox.</strong><p>${app.escapeHtml(error.message)}</p>`);
+      app.setRunOutput(target.key, 'fail', app.renderCompilerServiceError(error));
     }
   };
 
@@ -125,7 +152,7 @@
   app.executeCppProgram = async function executeCppProgram(program, stdin) {
     const response = await fetch(PISTON_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: app.getCompilerRequestHeaders(),
       body: JSON.stringify({
         language: CPP_LANGUAGE,
         version: CPP_VERSION,
@@ -222,7 +249,7 @@
       runtime.runResults[key] = { result, tests, rendered, timestamp: new Date().toISOString() };
       app.setRunOutput(key, rendered.tone, rendered.html);
     } catch (error) {
-      app.setRunOutput(key, 'fail', `<strong>Could not reach the compiler sandbox.</strong><p>${app.escapeHtml(error.message)}</p><p>Check your internet connection, then try again.</p>`);
+      app.setRunOutput(key, 'fail', app.renderCompilerServiceError(error));
     }
   };
 
@@ -240,7 +267,7 @@
       runtime.runResults[key] = { result, tests: [], rendered, timestamp: new Date().toISOString() };
       app.setRunOutput(key, rendered.tone, rendered.html);
     } catch (error) {
-      app.setRunOutput(key, 'fail', `<strong>Could not reach the compiler sandbox.</strong><p>${app.escapeHtml(error.message)}</p>`);
+      app.setRunOutput(key, 'fail', app.renderCompilerServiceError(error));
     }
   };
 })();
