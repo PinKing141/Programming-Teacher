@@ -1014,3 +1014,78 @@ button:disabled {
     align-items: flex-start;
   }
 }
+
+/* ══════════════════════════════════════════
+   FINISHED RESPONSIVE COMPONENT LAYOUT
+   ══════════════════════════════════════════ */
+@media (max-width: 760px), (pointer: coarse) and (max-width: 900px) {
+  .lesson-card,
+  .quiz-wrap,
+  .rq-controls,
+  .exam-history-wrap,
+  .checkpoint-history-wrap,
+  .result-screen,
+  .pass-hero,
+  .pass-card,
+  .pass-template,
+  .pass-checklist,
+  .cheat-card {
+    border-radius: var(--radius-lg);
+    padding: 18px;
+  }
+
+  .quiz-header,
+  .attempt-top,
+  .feedback-header,
+  .learn-nav-actions,
+  .rq-actions,
+  .result-actions,
+  .action-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .quiz-status,
+  .quiz-mark-label,
+  .clear-btn {
+    margin-left: 0;
+  }
+
+  .btn,
+  .gen-btn,
+  .exam-action-btn,
+  .mcq-opt {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  pre,
+  pre code.hljs,
+  .CodeMirror,
+  .code-editor {
+    max-width: 100%;
+  }
+
+  pre code.hljs,
+  .cheat-card pre code.hljs,
+  .pass-template pre code.hljs {
+    overflow-x: auto;
+    font-size: 12.5px;
+    padding: 14px !important;
+  }
+
+  .CodeMirror {
+    font-size: 13px;
+    min-height: 200px;
+  }
+
+  .profile-card {
+    width: min(100% - 24px, 480px);
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+  }
+
+  .profile-create-row {
+    flex-direction: column;
+  }
+}
