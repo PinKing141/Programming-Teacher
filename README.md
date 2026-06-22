@@ -27,6 +27,10 @@ Covers:
 - starting and submitting an Exam Sim attempt
 - restoring a saved code draft after a full page reload
 
+## Local Profiles
+
+The app uses browser-only learner profiles instead of cloud accounts. On first run, learners choose or create a profile from the “Who is learning?” screen. Each profile keeps progress, drafts, scores, checkpoint history, and exam history separate in `localStorage` under `cpp_tutor_profile::<profile-id>` keys.
+
 ## Notes
 
 - Both harnesses back up the existing `cpp_tutor_save` entry and restore it after each run.
