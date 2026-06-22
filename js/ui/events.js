@@ -19,6 +19,7 @@
     'check-code': element => app.checkCode(element.dataset.key),
     'run-code': element => app.runCode(element.dataset.key),
     'run-lab-code': () => app.runLabCode(),
+    'run-editor-code': element => app.runEditorCode(element.dataset.editorId),
     'show-hint': element => app.showHint(element.dataset.key),
     'close-feedback': element => app.closeFeedback(element.dataset.key),
     'reveal-answer': element => app.revealAnswer(element.dataset.key),

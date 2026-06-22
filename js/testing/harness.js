@@ -136,6 +136,15 @@
         }
       },
       {
+        name: 'Compiler targets route every IDE editor to a compiler output',
+        run() {
+          assert(app.getCompilerTargetFromEditorId('lab-editor').key === 'lab', 'Expected the lab IDE to use the lab compiler target.');
+          assert(app.getCompilerTargetFromEditorId('exam-ed-2').key === 'exam-2', 'Expected exam IDEs to route by exam question.');
+          assert(app.getCompilerTargetFromEditorId('ed-learn-0-4').key === 'learn-0-4', 'Expected lesson IDEs to route by question key.');
+          assert(app.getCompilerTargetFromEditorId('custom-ide').mode === 'standalone', 'Expected any other IDE to still receive standalone compiler support.');
+        }
+      },
+      {
         name: 'Compiler wrapper builds runnable test programs',
         run() {
           const program = app.buildCppProgram('int AddFive(int n) { return n + 5; }', [{ call: 'AddFive(3)', expected: '8' }]);
