@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C++ Tutor UI Workflow Harness</title>
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #0d1117;
+    color: #e6edf3;
+    font-family: Inter, sans-serif;
+    padding: 24px;
+  }
+
+  .shell {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    margin: 0 0 8px;
+    font-size: 32px;
+  }
+
+  p {
+    color: #8b949e;
+    margin: 0 0 24px;
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-weight: 700;
+    cursor: pointer;
+    background: #39d5ff;
+    color: #0d1117;
+  }
+
+  button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  .summary {
+    font-family: 'JetBrains Mono', monospace;
+    color: #39d5ff;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 20px;
+  }
+
+  .panel {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 16px;
+    padding: 24px;
+  }
+
+  .test-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 12px;
+  }
+
+  .test-item {
+    border-radius: 12px;
+    padding: 14px 16px;
+    border: 1px solid #30363d;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .test-item.pass {
+    border-color: #3fb950;
+    color: #7ee787;
+    background: rgba(63, 185, 80, 0.14);
+  }
+
+  .test-item.fail {
+    border-color: #f85149;
+    color: #ff7b72;
+    background: rgba(248, 81, 73, 0.14);
+  }
+
+  .test-item.running {
+    border-color: #d29922;
+    color: #e5b567;
+    background: rgba(210, 153, 34, 0.14);
+  }
+
+  .notes {
+    margin-top: 18px;
+    color: #8b949e;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  iframe {
+    width: 100%;
+    min-height: 780px;
+    border: 1px solid #30363d;
+    border-radius: 16px;
+    background: #0d1117;
+  }
+
+  @media (max-width: 980px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <h1>UI Workflow Harness</h1>
+  <p>Runs workflow-level checks against the full app shell: starting a day checkpoint, submitting an exam attempt, and restoring a saved draft after a reload. Existing saved progress is backed up and restored after the run.</p>
+  <div class="toolbar">
+    <button id="run-ui-tests" type="button">Run UI Tests</button>
+    <div id="ui-test-summary" class="summary">Waiting to run...</div>
+  </div>
+  <div class="layout">
+    <div class="panel">
+      <ul id="ui-test-results" class="test-list"></ul>
+      <div class="notes">
+        The embedded app on the right is the real tutor shell under test. This harness drives its delegated actions and reload behavior without requiring a build step.
+      </div>
+    </div>
+    <div class="panel">
+      <iframe id="app-frame" title="Tutor app under test" src="index.html"></iframe>
+    </div>
+  </div>
+</div>
+<script src="js/testing/ui-workflow-harness.js"></script>
+</body>
+</html>
