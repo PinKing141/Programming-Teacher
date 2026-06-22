@@ -699,3 +699,41 @@
     font-size: 17px;
   }
 }
+
+/* ══════════════════════════════════════════
+   FEATURE GRID FINISHING TOUCHES
+   ══════════════════════════════════════════ */
+.cheat-grid,
+.pass-grid,
+.pass-code-grid,
+.exam-history-summary,
+.result-breakdown,
+.attempt-breakdown {
+  min-width: 0;
+}
+
+.cheat-card,
+.pass-card,
+.rb-card,
+.attempt-item,
+.exam-history-card {
+  min-width: 0;
+}
+
+@media (max-width: 760px), (pointer: coarse) and (max-width: 900px) {
+  .cheat-grid,
+  .pass-grid,
+  .pass-code-grid,
+  .exam-history-summary,
+  .result-breakdown,
+  .attempt-breakdown {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .exam-info h2,
+  .pass-card h3,
+  .cheat-card h3 {
+    overflow-wrap: anywhere;
+  }
+}
