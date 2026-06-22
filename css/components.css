@@ -599,3 +599,58 @@ button:disabled {
   cursor: not-allowed;
   transform: none !important;
 }
+
+.feedback-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.feedback-close {
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.feedback-close:hover,
+.feedback-close:focus-visible {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.hint-guide p,
+.hint-guide ol {
+  margin-bottom: 10px;
+}
+
+.hint-checklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 8px 0 12px;
+  padding: 0;
+}
+
+.hint-structure summary {
+  cursor: pointer;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.answer-explanation {
+  margin-top: 14px;
+}
+
+.answer-explanation p,
+.answer-explanation ul {
+  margin-bottom: 10px;
+}

@@ -101,6 +101,41 @@
         }
       },
       {
+        name: 'Hints hide answer-equivalent return lines and include close action',
+        run() {
+          const html = app.buildGuidedHint({
+            _activeKey: 'learn-0-4',
+            hint: 'int AddFive(int n)\n{\n    return n + 5;\n}',
+            ans: 'int AddFive(int n)\n{\n    return n + 5;\n}',
+            checks: ['AddFive', 'int', 'return', 'n + 5']
+          });
+
+          assert(html.includes('Guided Hint'), 'Expected the richer guided hint heading.');
+          assert(html.includes('data-action="close-feedback"'), 'Expected a close button in the hint.');
+          assert(!html.includes('return n + 5;'), 'Expected answer-equivalent return line to be masked.');
+          assert(html.includes('TODO: decide the correct value'), 'Expected a nudge instead of the final return value.');
+        }
+      },
+      {
+        name: 'Feedback close clears an open hint panel',
+        run() {
+          const feedback = document.createElement('div');
+          feedback.id = 'fb-test-close';
+          feedback.className = 'feedback info';
+          const content = document.createElement('div');
+          content.id = 'fbc-test-close';
+          content.innerHTML = '<strong>Open hint</strong>';
+          document.body.append(feedback, content);
+
+          app.closeFeedback('test-close');
+
+          assert(feedback.className === 'feedback', 'Expected feedback class to reset.');
+          assert(content.innerHTML === '', 'Expected feedback content to be cleared.');
+          feedback.remove();
+          content.remove();
+        }
+      },
+      {
         name: 'State save and load round-trip through localStorage',
         run() {
           Object.assign(state, app.getDefaultState());

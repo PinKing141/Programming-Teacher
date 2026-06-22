@@ -211,15 +211,77 @@
     delete state.retrySources[key];
   };
 
+  app.buildGuidedHint = function buildGuidedHint(question) {
+    const checks = app.getUniqueChecks(question.checks || []);
+    const importantPieces = checks
+      .map(check => `<li><span class="inline-code">${app.escapeHtml(check.label)}</span></li>`)
+      .join('');
+    const rawHint = question.hint || '';
+    const rawAnswer = question.ans || '';
+    const hintLooksLikeAnswer = rawHint && app.normalizeCodeFragment(rawHint) === app.normalizeCodeFragment(rawAnswer);
+    const safeHint = hintLooksLikeAnswer
+      ? rawHint
+        .split('\n')
+        .map(line => line.trim().startsWith('return') ? '    // TODO: decide the correct value to return here' : line)
+        .join('\n')
+      : rawHint;
+
+    return `<div class="feedback-header">
+        <strong>Guided Hint — try this before showing the answer</strong>
+        <button class="feedback-close" type="button" data-action="close-feedback" data-key="${app.escapeHtml(question._activeKey || '')}" aria-label="Close hint">×</button>
+      </div>
+      <div class="hint-guide">
+        <p><strong>Plan:</strong> Read the function name, parameters, and return type from the question. Then write only the code needed to produce the requested return value.</p>
+        <ol>
+          <li><strong>Signature:</strong> Start with the required return type and exact function name.</li>
+          <li><strong>Inputs:</strong> Use the parameter names from the prompt; spelling matters.</li>
+          <li><strong>Logic:</strong> Add the condition, loop, class member, or calculation the prompt asks for.</li>
+          <li><strong>Return or set:</strong> Use <span class="inline-code">return</span> for value functions. Use assignment for setters. Do not use <span class="inline-code">cout</span>.</li>
+        </ol>
+        ${importantPieces ? `<p><strong>Your answer should include these key pieces:</strong></p><ul class="hint-checklist">${importantPieces}</ul>` : ''}
+      </div>
+      <details class="hint-structure" open>
+        <summary>Show starter structure</summary>
+        <pre><code class="language-cpp">${app.escapeHtml(safeHint || '// Start by matching the function or class shape from the question.')}</code></pre>
+      </details>`;
+  };
+
   app.showHint = function showHint(key) {
     const question = app.getQByKey(key);
     const feedback = document.getElementById('fb-' + key);
     const content = document.getElementById('fbc-' + key);
     if (feedback && question) {
       feedback.className = 'feedback info';
-      content.innerHTML = `<strong>Structural Hint:</strong><pre><code class="language-cpp">${app.escapeHtml(question.hint)}</code></pre>`;
-      hljs.highlightElement(content.querySelector('code'));
+      question._activeKey = key;
+      content.innerHTML = app.buildGuidedHint(question);
+      const code = content.querySelector('code');
+      if (code) hljs.highlightElement(code);
+      delete question._activeKey;
     }
+  };
+
+  app.closeFeedback = function closeFeedback(key) {
+    const feedback = document.getElementById('fb-' + key);
+    const content = document.getElementById('fbc-' + key);
+    if (!feedback || !content) return;
+    feedback.className = 'feedback';
+    content.innerHTML = '';
+  };
+
+  app.buildAnswerExplanation = function buildAnswerExplanation(question) {
+    const checks = app.getUniqueChecks(question.checks || []);
+    if (!checks.length) return '';
+
+    const pieces = checks
+      .map(check => `<li><span class="inline-code">${app.escapeHtml(check.label)}</span> — this is one required part the checker looks for.</li>`)
+      .join('');
+
+    return `<div class="answer-explanation">
+      <p><strong>Why this works:</strong> The solution mirrors the prompt exactly: match the required function or class shape, use the named inputs, then apply the requested calculation, branch, loop, getter, setter, or inheritance rule.</p>
+      <p><strong>Key parts in this answer:</strong></p>
+      <ul>${pieces}</ul>
+      <p><strong>Exam reminder:</strong> If the question asks for a value, return it. If it asks to update a field, assign the field. Do not print with <span class="inline-code">cout</span> unless the prompt explicitly asks for output.</p>
+    </div>`;
   };
 
   app.revealAnswer = function revealAnswer(key) {
@@ -228,7 +290,10 @@
     const content = document.getElementById('fbc-' + key);
     if (feedback && question) {
       feedback.className = 'feedback info';
-      content.innerHTML = `<strong>Model Answer:</strong><pre><code class="language-cpp">${app.escapeHtml(question.ans)}</code></pre>`;
+      content.innerHTML = `<div class="feedback-header">
+        <strong>Model Answer</strong>
+        <button class="feedback-close" type="button" data-action="close-feedback" data-key="${app.escapeHtml(key)}" aria-label="Close answer">×</button>
+      </div><pre><code class="language-cpp">${app.escapeHtml(question.ans)}</code></pre>${app.buildAnswerExplanation(question)}`;
       hljs.highlightElement(content.querySelector('code'));
     }
   };
