@@ -26,6 +26,12 @@
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="logo">cpp<span>_tutor</span>.exe</div>
+  <div class="account-switcher" aria-label="Local progress account controls">
+    <label for="account-select">Account</label>
+    <select id="account-select" class="account-select" data-action="switch-account" aria-label="Choose local progress account"></select>
+    <button class="account-btn" data-action="create-account" title="Create a new local progress account">＋</button>
+    <button class="account-btn account-btn-danger" data-action="delete-account" title="Delete the selected local progress account">−</button>
+  </div>
   <div class="topbar-center">
     <div class="overall-progress">
       <div class="progress-label" id="prog-label">Loading progress...</div>

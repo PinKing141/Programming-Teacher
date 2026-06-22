@@ -4,6 +4,7 @@
   app.init = function init() {
     app.bindUIEvents();
     app.loadState();
+    app.renderAccountPicker();
 
     if (app.state.dayCheckpoint && !app.state.dayCheckpoint.submitted) {
       app.startCheckpointTimer();

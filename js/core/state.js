@@ -1,9 +1,61 @@
 (function () {
   const app = window.App;
   const state = app.state;
+  const LEGACY_SAVE_KEY = 'cpp_tutor_save';
+  const ACCOUNT_META_KEY = 'cpp_tutor_accounts';
+  const CURRENT_ACCOUNT_KEY = 'cpp_tutor_current_account';
+  const ACCOUNT_SAVE_PREFIX = 'cpp_tutor_save::';
 
-  app.saveState = function saveState() {
-    localStorage.setItem('cpp_tutor_save', JSON.stringify({
+  function makeAccountId(name) {
+    return (name || 'learner')
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'learner';
+  }
+
+  function getAccountSaveKey(accountId = app.currentAccountId) {
+    return `${ACCOUNT_SAVE_PREFIX}${accountId}`;
+  }
+
+  function getStoredAccounts() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(ACCOUNT_META_KEY) || '[]');
+      return Array.isArray(parsed) ? parsed.filter(account => account && account.id && account.name) : [];
+    } catch (error) {
+      console.error('Failed to load accounts', error);
+      return [];
+    }
+  }
+
+  function storeAccounts(accounts) {
+    localStorage.setItem(ACCOUNT_META_KEY, JSON.stringify(accounts));
+  }
+
+  function ensureAccounts() {
+    let accounts = getStoredAccounts();
+
+    if (!accounts.length) {
+      accounts = [{ id: 'default', name: 'Default' }];
+      const legacySave = localStorage.getItem(LEGACY_SAVE_KEY);
+      if (legacySave && !localStorage.getItem(getAccountSaveKey('default'))) {
+        localStorage.setItem(getAccountSaveKey('default'), legacySave);
+      }
+      storeAccounts(accounts);
+    }
+
+    let currentId = localStorage.getItem(CURRENT_ACCOUNT_KEY);
+    if (!accounts.some(account => account.id === currentId)) currentId = accounts[0].id;
+    localStorage.setItem(CURRENT_ACCOUNT_KEY, currentId);
+
+    app.accounts = accounts;
+    app.currentAccountId = currentId;
+    return accounts;
+  }
+
+  function getSerializableState() {
+    return {
       day: state.day,
       panel: state.panel,
       answered: state.answered,
@@ -15,12 +67,74 @@
       dayCheckpoint: state.dayCheckpoint,
       dayCheckpointHistory: state.dayCheckpointHistory,
       examHistory: state.examHistory
-    }));
+    };
+  }
+
+  function stopActiveTimers() {
+    if (app.runtime.drillTimer) {
+      clearInterval(app.runtime.drillTimer);
+      app.runtime.drillTimer = null;
+    }
+    if (state.examTimer) clearInterval(state.examTimer);
+    if (state.dayCheckpointTimer) clearInterval(state.dayCheckpointTimer);
+  }
+
+  app.renderAccountPicker = function renderAccountPicker() {
+    const select = document.getElementById('account-select');
+    if (!select) return;
+
+    ensureAccounts();
+    select.innerHTML = app.accounts
+      .map(account => `<option value="${app.escapeHtml(account.id)}" ${account.id === app.currentAccountId ? 'selected' : ''}>${app.escapeHtml(account.name)}</option>`)
+      .join('');
+  };
+
+  app.refreshForCurrentAccount = function refreshForCurrentAccount() {
+    const rqOutput = document.getElementById('rq-output');
+    const examQuestions = document.getElementById('exam-questions');
+    const examResults = document.getElementById('exam-results');
+    const startExamButton = document.getElementById('start-exam-btn');
+    const submitExamButton = document.getElementById('submit-exam-btn');
+    const examStatus = document.getElementById('exam-status-text');
+    const examProgress = document.getElementById('exam-prog-text');
+
+    if (rqOutput) rqOutput.innerHTML = '<div class="empty-state"><div class="es-icon">🎲</div><h3>Click Generate Question to start</h3><p>Questions are picked randomly based on your filters.</p></div>';
+    if (examQuestions) examQuestions.innerHTML = '';
+    if (examResults) examResults.classList.add('hidden');
+    if (startExamButton) {
+      startExamButton.classList.remove('hidden');
+      startExamButton.textContent = 'Start Exam';
+    }
+    if (submitExamButton) submitExamButton.classList.add('hidden');
+    if (examStatus) examStatus.textContent = 'Ready to start';
+    if (examProgress) examProgress.textContent = '3 Scenarios · 6 Questions · 100 marks';
+    app.setTimerProgress(document.getElementById('exam-timer'), {
+      text: '120:00',
+      secondsLeft: app.getDefaultState().examSecondsLeft,
+      totalSeconds: app.getDefaultState().examSecondsLeft,
+      tone: 'ok'
+    });
+
+    if (state.dayCheckpoint && !state.dayCheckpoint.submitted) app.startCheckpointTimer();
+    if (state.panel === 'checkpoint') app.renderDayCheckpointPanel();
+    else app.renderLearnPanel();
+    app.showPanel(state.panel || 'learn');
+    app.updateDayBadge();
+    app.renderExamHistory();
+    app.renderDayCheckpointPanel();
+    app.syncGlobalTimer();
+    app.renderAccountPicker();
+  };
+
+  app.saveState = function saveState() {
+    ensureAccounts();
+    localStorage.setItem(getAccountSaveKey(), JSON.stringify(getSerializableState()));
   };
 
   app.loadState = function loadState() {
     try {
-      const saved = localStorage.getItem('cpp_tutor_save');
+      ensureAccounts();
+      const saved = localStorage.getItem(getAccountSaveKey());
       if (saved) {
         const parsed = JSON.parse(saved);
         state.day = Number.isInteger(parsed.day) ? parsed.day : 0;
@@ -40,42 +154,71 @@
     }
   };
 
+  app.createAccount = function createAccount() {
+    const name = window.prompt('New local account name (saved only in this browser):');
+    if (!name || !name.trim()) return;
+
+    const accounts = ensureAccounts();
+    const baseId = makeAccountId(name);
+    let id = baseId;
+    let suffix = 2;
+    while (accounts.some(account => account.id === id)) id = `${baseId}-${suffix++}`;
+
+    accounts.push({ id, name: name.trim() });
+    storeAccounts(accounts);
+    app.saveState();
+    app.currentAccountId = id;
+    localStorage.setItem(CURRENT_ACCOUNT_KEY, id);
+    stopActiveTimers();
+    Object.assign(state, app.getDefaultState());
+    app.saveState();
+    app.refreshForCurrentAccount();
+  };
+
+  app.switchAccount = function switchAccount(accountId) {
+    ensureAccounts();
+    if (!app.accounts.some(account => account.id === accountId) || accountId === app.currentAccountId) return;
+
+    app.saveState();
+    app.currentAccountId = accountId;
+    localStorage.setItem(CURRENT_ACCOUNT_KEY, accountId);
+    stopActiveTimers();
+    Object.assign(state, app.getDefaultState());
+    app.loadState();
+    app.refreshForCurrentAccount();
+  };
+
+  app.deleteCurrentAccount = function deleteCurrentAccount() {
+    const accounts = ensureAccounts();
+    const current = accounts.find(account => account.id === app.currentAccountId);
+    if (accounts.length === 1) {
+      window.alert('Create another account before deleting this one.');
+      return;
+    }
+    if (!window.confirm(`Delete the local account "${current.name}" and its saved progress from this browser?`)) return;
+
+    localStorage.removeItem(getAccountSaveKey(current.id));
+    const remaining = accounts.filter(account => account.id !== current.id);
+    storeAccounts(remaining);
+    app.currentAccountId = remaining[0].id;
+    localStorage.setItem(CURRENT_ACCOUNT_KEY, app.currentAccountId);
+    stopActiveTimers();
+    Object.assign(state, app.getDefaultState());
+    app.loadState();
+    app.refreshForCurrentAccount();
+  };
+
   app.resetEverything = function resetEverything() {
-    const confirmed = window.confirm('Reset all saved progress, code drafts, scores, streaks, answered questions, and past test history?');
+    const confirmed = window.confirm('Reset this account\'s saved progress, code drafts, scores, streaks, answered questions, and past test history? Other accounts will not be changed.');
     if (!confirmed) return;
 
-    localStorage.removeItem('cpp_tutor_save');
-
-    if (app.runtime.drillTimer) {
-      clearInterval(app.runtime.drillTimer);
-      app.runtime.drillTimer = null;
-    }
-
-    if (state.examTimer) clearInterval(state.examTimer);
-    if (state.dayCheckpointTimer) clearInterval(state.dayCheckpointTimer);
+    ensureAccounts();
+    localStorage.removeItem(getAccountSaveKey());
+    stopActiveTimers();
 
     Object.assign(state, app.getDefaultState());
-
-    document.getElementById('rq-output').innerHTML = '<div class="empty-state"><div class="es-icon">🎲</div><h3>Click Generate Question to start</h3><p>Questions are picked randomly based on your filters.</p></div>';
-    document.getElementById('exam-questions').innerHTML = '';
-    document.getElementById('exam-results').classList.add('hidden');
-    document.getElementById('start-exam-btn').classList.remove('hidden');
-    document.getElementById('start-exam-btn').textContent = 'Start Exam';
-    document.getElementById('submit-exam-btn').classList.add('hidden');
-    document.getElementById('exam-status-text').textContent = 'Ready to start';
-    document.getElementById('exam-prog-text').textContent = '3 Scenarios · 6 Questions · 100 marks';
-    app.setTimerProgress(document.getElementById('exam-timer'), {
-      text: '120:00',
-      secondsLeft: app.getDefaultState().examSecondsLeft,
-      totalSeconds: app.getDefaultState().examSecondsLeft,
-      tone: 'ok'
-    });
-    app.syncGlobalTimer();
-
-    app.goDay(0);
-    app.updateDayBadge();
-    app.renderExamHistory();
-    app.renderDayCheckpointPanel();
+    app.saveState();
+    app.refreshForCurrentAccount();
   };
 
   app.recordScore = function recordScore(correct) {

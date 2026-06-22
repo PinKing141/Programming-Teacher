@@ -21,7 +21,10 @@
     'close-feedback': element => app.closeFeedback(element.dataset.key),
     'reveal-answer': element => app.revealAnswer(element.dataset.key),
     'clear-editor': element => app.clearEditor(element.dataset.editorId),
-    'print-page': () => window.print()
+    'print-page': () => window.print(),
+    'create-account': () => app.createAccount(),
+    'delete-account': () => app.deleteCurrentAccount(),
+    'switch-account': element => app.switchAccount(element.value)
   };
 
   app.bindUIEvents = function bindUIEvents() {
@@ -30,12 +33,22 @@
 
     document.addEventListener('click', event => {
       const trigger = event.target.closest('[data-action]');
-      if (!trigger) return;
+      if (!trigger || trigger.dataset.action === 'switch-account') return;
 
       const action = clickActions[trigger.dataset.action];
       if (!action) return;
 
       event.preventDefault();
+      action(trigger, event);
+    });
+
+    document.addEventListener('change', event => {
+      const trigger = event.target.closest('[data-action="switch-account"]');
+      if (!trigger) return;
+
+      const action = clickActions[trigger.dataset.action];
+      if (!action) return;
+
       action(trigger, event);
     });
   };
