@@ -650,3 +650,52 @@
     flex-direction: column;
   }
 }
+
+@media (max-width: 760px), (pointer: coarse) and (max-width: 900px) {
+  .rq-filters,
+  .exam-history-summary,
+  .attempt-breakdown,
+  .result-breakdown,
+  .pass-grid,
+  .pass-code-grid,
+  .cheat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rq-filters {
+    display: grid;
+    gap: 14px;
+  }
+
+  .rq-filters > div {
+    min-width: 0;
+  }
+
+  .exam-header {
+    position: static;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'timer'
+      'info'
+      'action';
+    justify-items: stretch;
+    text-align: center;
+    padding: 18px;
+  }
+
+  .exam-timer {
+    justify-self: center;
+  }
+
+  .pass-hero h2 {
+    font-size: 22px;
+  }
+
+  .result-pct {
+    font-size: clamp(52px, 18vw, 72px);
+  }
+
+  .drill-timer-text {
+    font-size: 17px;
+  }
+}

@@ -380,3 +380,171 @@ pre,
     font-style: italic;
   }
 }
+
+@media (max-width: 760px), (pointer: coarse) and (max-width: 900px) {
+  html,
+  body {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    font-size: 16px;
+  }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    height: auto;
+    overflow: visible;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: stretch;
+    padding: 10px 12px;
+  }
+
+  .logo {
+    flex: 1 1 auto;
+    min-width: 145px;
+    padding-top: 4px;
+  }
+
+  .account-switcher {
+    flex: 0 1 auto;
+    max-width: calc(100vw - 24px);
+  }
+
+  .profile-label,
+  .topbar-timer-copy,
+  .progress-label {
+    display: none;
+  }
+
+  .topbar-center {
+    flex: 1 0 100%;
+    order: 3;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .overall-progress {
+    grid-column: 1 / -1;
+    max-width: none;
+  }
+
+  .score-chip,
+  .streak-chip {
+    min-width: 0;
+    padding: 8px 10px;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .topbar-timer {
+    order: 2;
+    margin-left: auto;
+    padding: 4px;
+  }
+
+  .topbar-timer-ring {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+
+  .mode-btns {
+    order: 4;
+    flex: 1 0 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin-left: 0;
+  }
+
+  .mode-btn {
+    min-height: 42px;
+    padding: 9px 6px;
+    font-size: 12px;
+  }
+
+  .sidebar {
+    position: static;
+    z-index: 20;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    scroll-snap-type: x proximity;
+  }
+
+  .sidebar-section,
+  .sidebar-stats-card,
+  .sidebar-reset-btn,
+  .sidebar-sep-compact,
+  .sidebar .sep {
+    display: none;
+  }
+
+  .nav-item {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 140px;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--bg3);
+    scroll-snap-align: start;
+    white-space: nowrap;
+  }
+
+  .nav-item.active {
+    border-color: var(--blue);
+    background: var(--blue-dim);
+  }
+
+  .nav-item-exam-day {
+    margin-top: 0;
+    padding-top: 10px;
+  }
+
+  .nav-item .nav-icon {
+    width: auto;
+  }
+
+  .nav-item .nav-pct {
+    margin-left: 2px;
+  }
+
+  .main {
+    flex: 1;
+    width: 100%;
+    overflow: visible;
+    padding: 20px 14px 36px;
+  }
+
+  .panel {
+    max-width: 100%;
+  }
+
+  .page-title {
+    font-size: clamp(24px, 7vw, 30px);
+    line-height: 1.15;
+  }
+
+  .page-sub {
+    margin-bottom: 20px;
+  }
+}

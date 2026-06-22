@@ -45,7 +45,7 @@
         smartIndent: true,
         matchBrackets: true,
         autoCloseBrackets: true,
-        lineWrapping: false,
+        lineWrapping: typeof app.isPhoneLayout === 'function' ? app.isPhoneLayout() : false,
         extraKeys: {
           Tab(cm) {
             cm.replaceSelection('    ', 'end');
@@ -56,7 +56,7 @@
         }
       });
 
-      editor.setSize(null, '220px');
+      editor.setSize(null, typeof app.isPhoneLayout === 'function' && app.isPhoneLayout() ? '260px' : '220px');
       editor.on('change', cm => app.persistDraft(textarea.id, cm.getValue()));
       editorRegistry.set(textarea.id, editor);
       return;
